@@ -1747,7 +1747,7 @@ module.exports = {
             return vec4(c,1.0);
         }
         `
-    },
+            },
     neon: {
         type: 'src',
         inputs: [  
@@ -1876,58 +1876,58 @@ module.exports = {
             float d = min(sphereDist, planeDist);
             return d;
         }
-        `
+            `
     },
     RayMarch: {
         type: 'util',
         glsl: `float RayMarch(vec3 ro, vec3 rd)
-        {
-            float dO=0.;
-            // TODO MAX_STEPS 100, MAX_DIST 30.,SURF_DIST .01
-            for(int i=0; i<100; i++) {
-                vec3 p = ro + rd*dO;
-                float dS = GetDist(p);
-                dO += dS;
-                if(dO>30. || dS<.01) break;
-            }
+            {
+                float dO=0.;
+                // TODO MAX_STEPS 100, MAX_DIST 30.,SURF_DIST .01
+                for(int i=0; i<100; i++) {
+                    vec3 p = ro + rd*dO;
+                    float dS = GetDist(p);
+                    dO += dS;
+                    if(dO>30. || dS<.01) break;
+                }
 
-            return dO;
-        }
-        `
+                return dO;
+            }
+                `
     },
     GetNormal: {
         type: 'util',
         glsl: `vec3 GetNormal(vec3 p)
-        {
-            float d = GetDist(p);
-            vec2 e = vec2(.01, 0);
+                {
+                    float d = GetDist(p);
+                    vec2 e = vec2(.01, 0);
 
-            vec3 n = d - vec3(
-                GetDist(p-e.xyy),
-                GetDist(p-e.yxy),
-                GetDist(p-e.yyx));
+                    vec3 n = d - vec3(
+                        GetDist(p-e.xyy),
+                        GetDist(p-e.yxy),
+                        GetDist(p-e.yyx));
 
-            return normalize(n);
-        }
-        `
+                    return normalize(n);
+                }
+                `
     },
     GetLight: {
         type: 'util',
         glsl: `float GetLight(vec3 p)
-        {
-            vec3 lightPos = vec3(0, 5, 6);
-            lightPos.xz += vec2(sin(time), cos(time))*2.;
-            vec3 l = normalize(lightPos-p);
-            vec3 n = GetNormal(p);
+                {
+                    vec3 lightPos = vec3(0, 5, 6);
+                    lightPos.xz += vec2(sin(time), cos(time))*2.;
+                    vec3 l = normalize(lightPos-p);
+                    vec3 n = GetNormal(p);
 
-            float dif = clamp(dot(n, l), 0., 1.);
-            // todo SURF_DIST .01
-            float d = RayMarch(p+n*.01*2., l);
-            if(d<length(lightPos-p)) dif *= .1;
+                    float dif = clamp(dot(n, l), 0., 1.);
+                    // todo SURF_DIST .01
+                    float d = RayMarch(p+n*.01*2., l);
+                    if(d<length(lightPos-p)) dif *= .1;
 
-            return dif;
-        }
-        `
+                    return dif;
+                }
+                `
     },
     sphere: {
         type: 'src',
@@ -1958,7 +1958,7 @@ module.exports = {
             col = vec3(dif);  
             return vec4(col,1.0);
         }
-        `
+                `
     },
     circles: {
         type: 'src',
@@ -1974,7 +1974,38 @@ module.exports = {
             // p.x *= resolution.x/resolution.y;
             return vec4(sin(length(_st-0.5)*10.0-time*speed));
         }
-        `
+                `
+    },
+    circle: {
+        type: 'util',
+        glsl: ` float circle(in vec2 _st, in float _radius){
+            vec2 dist = _st-vec2(0.5);
+            return 1.-smoothstep(_radius-(_radius*0.01), _radius+(_radius*0.01), dot(dist,dist)*4.0);
+}
+`
+    },
+    sun: {
+        type: 'src',
+        inputs: [
+            {
+                name: 'speed',
+                type: 'float',
+                default: 0.1
+            }
+        ],
+        glsl: `
+                vec4 sun(vec2 uv, float speed)
+                {
+                        vec2 _uv = vec2(uv.x, 1. - uv.y );
+                        vec3 color = vec3(1.0);
+                        float _sun = smoothstep(mod(_uv.y * (10. + speed) + time, 1.), -.2 + 0.332 * _uv.y * 3.204, time);
+                        color.r *= _sun;
+                        color.g *= _sun * (0.6 + _uv.y - clamp(fract(time), 0.6, 0.7));
+                        color.b = 0.;
+                        return vec4(color * circle(uv, .8), 1.);
+                }
+                `
+
     },
     outRunLine: {
         type: 'util',
@@ -1992,43 +2023,43 @@ module.exports = {
     bottomGrid: {
         type: 'util',
         glsl: `
-        vec3 bottomGrid(vec2 st, in vec3 col, in float maxlines, in float inactive) {
-            st = vec2(1.0) - st;
-            vec2 lines = vec2(10.0, 20.0);
-            float activeVLines = 20.0 - inactive;
-            float maxVlines = 10.0 + maxlines;
-            vec2 shift = vec2(mix(lines.x, maxVlines, st.y), lines.y);
-            vec2 suv = vec2((st.x * shift.x) - (shift.x * 0.5), st.y * shift.y);
-            vec2 fuv = fract(suv);
-            vec2 iuv = floor(suv);
+                vec3 bottomGrid(vec2 st, in vec3 col, in float maxlines, in float inactive) {
+                    st = vec2(1.0) - st;
+                    vec2 lines = vec2(10.0, 20.0);
+                    float activeVLines = 20.0 - inactive;
+                    float maxVlines = 10.0 + maxlines;
+                    vec2 shift = vec2(mix(lines.x, maxVlines, st.y), lines.y);
+                    vec2 suv = vec2((st.x * shift.x) - (shift.x * 0.5), st.y * shift.y);
+                    vec2 fuv = fract(suv);
+                    vec2 iuv = floor(suv);
 
-            col *= step(activeVLines, suv.y);
+                    col *= step(activeVLines, suv.y);
 
-            // glow lines
-            vec3 glowCol = vec3(0.3, 1.0, 0.3);
-            float _time = 1.0 - fract(time* 0.6);
+                    // glow lines
+                    vec3 glowCol = vec3(0.3, 1.0, 0.3);
+                    float _time = 1.0 - fract(time* 0.6);
 
-            float gvLine = outRunLine(0.0, 0.04, 0.08, fuv.x);
-            float ghLine = max(
-                outRunLine(_time, 0.12, 0.24, fuv.y),
-                outRunLine(0.0, 0.12, 0.12, fuv.y) * step(activeVLines - 0.16, suv.y)
-            );
+                    float gvLine = outRunLine(0.0, 0.04, 0.08, fuv.x);
+                    float ghLine = max(
+                        outRunLine(_time, 0.12, 0.24, fuv.y),
+                        outRunLine(0.0, 0.12, 0.12, fuv.y) * step(activeVLines - 0.16, suv.y)
+                    );
 
-            col = mix(col, glowCol, max(ghLine, gvLine) * step(suv.y, activeVLines + .16) * 0.3);
+                    col = mix(col, glowCol, max(ghLine, gvLine) * step(suv.y, activeVLines + .16) * 0.3);
 
-            // lines
-            vec3 lineCol = vec3(1.0, 1.0, 1.0);
+                    // lines
+                    vec3 lineCol = vec3(1.0, 1.0, 1.0);
 
-            float vLine = outRunLine(0.0, 0.0025, 0.03, fuv.x);
-            float hLine = max(
-                outRunLine(_time, 0.015, 0.06, fuv.y),
-                outRunLine(0.0, 0.03, 0.03, fuv.y) * step(activeVLines - 0.04, suv.y)
-            );
+                    float vLine = outRunLine(0.0, 0.0025, 0.03, fuv.x);
+                    float hLine = max(
+                        outRunLine(_time, 0.015, 0.06, fuv.y),
+                        outRunLine(0.0, 0.03, 0.03, fuv.y) * step(activeVLines - 0.04, suv.y)
+                    );
 
-            col = mix(col, lineCol, max(hLine, vLine) * step(suv.y, activeVLines + .04));
-            return col;
-        }
-        `
+                    col = mix(col, lineCol, max(hLine, vLine) * step(suv.y, activeVLines + .04));
+                    return col;
+                }
+                `
     },
 
     outrun:{
@@ -2046,23 +2077,23 @@ module.exports = {
                 }
             ],
             glsl: `
-        vec4 outrun(vec2 _st, float speed, float active)
-        {
-            vec3 cc = vec3(0.0);
-            vec3 color = bottomGrid(_st, cc, speed, active);
-            return vec4(color, 1.0);
-        } `
+                vec4 outrun(vec2 _st, float speed, float active)
+                {
+                    vec3 cc = vec3(0.0);
+                    vec3 color = bottomGrid(_st, cc, speed, active);
+                    return vec4(color, 1.0);
+                } `
     },
     checker: {
         type: 'util',
             glsl: `
-        float checker(vec2 coord) {
-            coord = mod(floor(coord), 2.0);
-            return mod(coord.x + coord.y, 2.0);
-        }
-        `
+                float checker(vec2 coord) {
+                    coord = mod(floor(coord), 2.0);
+                    return mod(coord.x + coord.y, 2.0);
+                }
+                `
     },
-    vaporwave1:{
+    vaporwave:{
         type: 'src',
             inputs: [
                 {
@@ -2087,30 +2118,30 @@ module.exports = {
                 }, 
             ],
             glsl: `
-        const vec3 colorA = vec3(0.8, 0.3, 0.5);
-        const vec3 colorB = vec3(0.1, 0.4, 0.8);
-        const vec3 colorC = vec3(0.3, 0.8, 0.5);
+                const vec3 colorA = vec3(0.8, 0.3, 0.5);
+                const vec3 colorB = vec3(0.1, 0.4, 0.8);
+                const vec3 colorC = vec3(0.3, 0.8, 0.5);
 
 
-        vec4 vaporwave1(vec2 coord, float speed, float size, float blend, float zoom) {
-            vec2 ps = vec2(size) / resolution.yx;
-            vec2 uv = coord * ps;
-            vec3 color;
+                vec4 vaporwave(vec2 coord, float speed, float size, float blend, float zoom) {
+                    vec2 ps = vec2(size) / resolution.yx;
+                    vec2 uv = coord * ps;
+                    vec3 color;
 
-            vec3 cam = vec3(uv, zoom);
+                    vec3 cam = vec3(uv, zoom);
 
-            vec2 cam_uv = cam.xz / cam.y * speed;
-            cam_uv.y -= time;
+                    vec2 cam_uv = cam.xz / cam.y * speed;
+                    cam_uv.y -= time;
 
-            float ground = uv.y > 0.25 ? checker(cam_uv) : 0.0;
+                    float ground = uv.y > 0.25 ? checker(cam_uv) : 0.0;
 
-            color += mix(colorA, colorB, ground);// * (1.0 - uv.y) * 0.75);
+                    color += mix(colorA, colorB, ground);// * (1.0 - uv.y) * 0.75);
 
-            color = mix(color, colorC, blend);
-            return vec4(color, 1.0);
-        }   `,
+                    color = mix(color, colorC, blend);
+                    return vec4(color, 1.0);
+                }   `,
     },
-    vaporwave2: {
+    synthwave: {
         type: 'src',
         inputs: [
                 {
@@ -2125,19 +2156,94 @@ module.exports = {
                 },
         ],
         glsl: `
-        vec4 vaporwave2(vec2 U, float glow, float zoom) {
-            U = vec2(1.) - vec2(zoom) * U;
-            vec4 O;
-            vec2 R = resolution.yx;
-            float C = glow-U.y/R.y;
-            U.y = 1.-U.y*2.;                   // swap vertical
-            U /= 1.+U.y/100.;                // perspective
-            U.y -= time;
-            U = abs(fract(U)-.5);           // distance to axis
-            U = glow/ sqrt(U);                // turn to blured line
-            O = (U.x*C+U.y*C*2.) * vec4(.3,.3,1.,1.) * C + vec4(.4,0.1,.2,1.) * C; // combine H&V + color * inverted fade
-            return O;
-        }
-        `
-    }
+                vec4 synthwave(vec2 U, float glow, float zoom) {
+                    U = vec2(1.) - vec2(zoom) * U;
+                    vec4 O;
+                    vec2 R = resolution.yx;
+                    float C = glow-U.y/R.y;
+                    U.y = 1.-U.y*2.;                   // swap vertical
+                    U /= 1.+U.y/100.;                // perspective
+                    U.y -= time;
+                    U = abs(fract(U)-.5);           // distance to axis
+                    U = glow/ sqrt(U);                // turn to blured line
+                    O = (U.x*C+U.y*C*2.) * vec4(.3,.3,1.,1.) * C + vec4(.4,0.1,.2,1.) * C; // combine H&V + color * inverted fade
+                    return O;
+                }
+                `
+    },
+
+    random: {
+        type: 'util',
+        glsl: `
+            float random (in vec2 _st) {
+                return fract(sin(dot(_st.xy, vec2(12.9898,78.233)))* 43758.5453123 + abs(time * .125));
+        }`
+    },
+    truchetPattern: {
+        type: 'util',
+        glsl: `
+        vec2 truchetPattern(in vec2 _st, in float _index){
+            _index = fract(((_index-0.5)*2.0));
+            if (_index > 0.75) {
+                _st = vec2(1.0) - _st;
+            } else if (_index > 0.5) {
+                _st = vec2(1.0-_st.x,_st.y);
+            } else if (_index > 0.25) {
+                _st = 1.0-vec2(1.0-_st.x,_st.y);
+            }
+            return _st;
+        }`
+    },
+    tiles: {
+        type: 'src',
+        inputs: [
+                {
+                    name: 'speed',
+                    type: 'float',
+                    default: .2
+                },
+                {
+                    name: 'mode',
+                    type: 'float',
+                    default: 0
+                },
+        ],
+        glsl: `
+            vec4 tiles(vec2 st, float speed, float mode) {
+                st *= 10.0;
+                st = (st-vec2(5.0))*(abs(sin(time*speed)));
+                st.x += time*3.0;
+
+                vec2 ipos = floor(st);  // integer
+                vec2 fpos = fract(st);  // fraction
+
+                vec2 tile = truchetPattern(fpos, random( ipos ));
+
+                float color = 0.0;
+
+                // Maze
+                if (mode == 0.){
+                    color = smoothstep(tile.x-0.3,tile.x,tile.y)-
+                        smoothstep(tile.x,tile.x+0.3,tile.y);
+                }
+
+                // Circles
+                if(mode == 1.){
+                    color = (step(length(tile),0.6) -
+                        step(length(tile),0.4) ) +
+                        (step(length(tile-vec2(1.)),0.6) -
+                            step(length(tile-vec2(1.)),0.4) );
+                }
+
+                // Truchet (2 triangles)
+                if(mode == 2.){
+                    color = step(tile.x,tile.y);
+                }
+
+                return vec4(vec3(color),1.0);
+
+            }
+                `
+    },
+
 }
