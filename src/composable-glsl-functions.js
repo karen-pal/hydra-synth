@@ -2024,7 +2024,7 @@ module.exports = {
 						vec2 ipos = floor(st*rows);
 						vec2 fpos = fract(st*rows);
 
-						ipos += vec2(0.,floor(time*20.*random_f(ipos.x+1.)));
+						ipos += vec2(0.,floor(-time*20.*random_f(ipos.x+1.)));
 						float pct = 2.;
 						pct *= randomChar(ipos,fpos);
 						pct *= random_i(ipos);
