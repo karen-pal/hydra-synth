@@ -1984,6 +1984,54 @@ module.exports = {
 }
 `
     },
+    random_f: {
+        type: 'util',
+        glsl: `
+            float random_f(in float x) {
+                return fract(sin(x)*43758.5453);
+        }`
+    },
+    random_i: {
+        type: 'util',
+        glsl: `
+            float random_i (in vec2 _st) {
+                return fract(sin(dot(_st.xy, vec2(12.9898,78.233)))* 43758.5453123 + abs(time * .125));
+        }`
+    },
+    randChar: {
+        type: 'util',
+        glsl: ` float randomChar(in vec2 outer, in vec2 inner){
+						float grid = 5.;
+						vec2 margin = vec2(.2,.05);
+						vec2 borders = step(margin,inner)*step(margin,1.-inner);
+						vec2 ipos = floor(inner*grid);
+						vec2 fpos = fract(inner*grid);
+						return step(.5,random_i(outer*64.+ipos))*borders.x*borders.y*step(0.01,fpos.x)*step(0.01,fpos.y);
+					}
+					`
+    },
+    matrix: {
+        type: 'src',
+        inputs: [
+            {
+                name: 'rows',
+                type: 'float',
+                default: 24.0
+            }
+        ],
+        glsl: `vec4 matrix(vec2 st, float rows){
+						vec3 color = vec3(.0);
+						vec2 ipos = floor(st*rows);
+						vec2 fpos = fract(st*rows);
+
+						ipos += vec2(0.,floor(time*20.*random_f(ipos.x+1.)));
+						float pct = 2.;
+						pct *= randomChar(ipos,fpos);
+						pct *= random_i(ipos);
+						color = vec3(pct);
+            return vec4(color, 1.0);
+        }`
+    },
     sun: {
         type: 'src',
         inputs: [
