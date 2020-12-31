@@ -4,7 +4,7 @@ Video synth engine for [hydra](https://github.com/ojack/hydra).
 
 Currently experimental / in-progress.
 
-This is the main logic of hydra packaged as a javascript module, intended for use within javascript projects. If you are looking to get started with hydra quickly, visit the [web editor](https://hydra-editor.glitch.me) or the [main repo](https://github.com/ojack/hydra). To use hydra within atom, follow the instructions at https://github.com/ojack/hydra-examples.
+This is the main logic of hydra packaged as a javascript module, intended for use within javascript projects. If you are looking to get started with hydra quickly, visit the [web editor](https://hydra.ojack.xyz) or the [main repo](https://github.com/ojack/hydra). To use hydra within atom, follow the instructions at https://github.com/ojack/hydra-examples.
 
 ### To install:
 
@@ -29,7 +29,7 @@ window.onload = function () {
 
   // by default, hydra makes everything global.
   // see options to change parameters
-  hydra.osc().out()
+  osc().out()
 }
 ```
 
@@ -45,22 +45,26 @@ If `opts` is specified, the default options (shown below) will be overridden.
 {
   canvas: null, // canvas element to render to. If none is supplied, a canvas will be created and appended to the screen
 
-  pb: null, // an instance of rtc-patch-bay to use for networking
-
   autoLoop: true, // if true, will automatically loop using requestAnimationFrame.If set to false, you must implement your own loop function using the tick() method (below)
 
   makeGlobal: true, // if false, will not pollute global namespace
 
   numSources: 4, // number of source buffers to create initially
 
+  detectAudio = true,
+
   numOutputs: 4, // number of output buffers to use. Note: untested with numbers other than 4. render() method might behave unpredictably
+
+  extendTransforms: [] // An array of transforms to be added to the synth, or an object representing a single transform
+
+  precision: 'mediump' // precision of shaders, can also be 'highp'
 }
 
 ```
 
-resize the hydra canvas (note: this changes the underlying resolution. To change appearance on the screen, you should edit the css)
+set the resolution of the hydra canvas (note: this changes the underlying resolution. To change appearance on the screen, you should edit the css)
 ```
-hydra.resize(width, height)
+hydra.setResolution(width, height)
 ```
 
 render an oscillator with parameters frequency, sync, and rgb offset:
@@ -86,6 +90,19 @@ webcam kaleidoscope:
 ```
 s0.initCam() //initialize a webcam in source buffer s0
 src(s0).kaleid(4).out() //render the webcam to a kaleidoscope
+```
+
+use a video as a source:
+```
+s0.initVideo("https://media.giphy.com/media/AS9LIFttYzkc0/giphy.mp4")
+src(s0).out()
+```
+
+
+use an image as a source:
+```
+s0.initImage("https://upload.wikimedia.org/wikipedia/commons/2/25/Hydra-Foto.jpg")
+src(s0).out()
 ```
 
 By default, the environment contains four separate output buffers that can each render different graphics.  The outputs are accessed by the variables o0, o1, o2, and o3.
@@ -151,10 +168,11 @@ s0.clear()
 
 
 #### Non-global mode [in progress]
-If makeGlobal is set to false, buffers and functions can be accessed via the hydra instance. Note that sources and buffers are contained in an array and accessed by index. E.g.:
+If makeGlobal is set to false, buffers and functions can be accessed via the synth property of the hydra instance. Note that sources and buffers are contained in an array and accessed by index. E.g.:
 ```
-hydra.s[0].initCam()
-hydra.osc().out(hydra.o[0])
+let synth = hydra.synth
+synth.osc().out()
+synth.s0.initCam()
 ```
 
 #### Custom render loop
