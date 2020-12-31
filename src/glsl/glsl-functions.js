@@ -1106,6 +1106,61 @@ module.exports = [
 
     },
     {
+        name : 'tiles',
+        type: 'src',
+        inputs: [
+                {
+                    name: 'mode',
+                    type: 'float',
+                    default: 0
+                },
+                {
+                    name: 'speed',
+                    type: 'float',
+                    default: .2
+                },
+
+                {
+                    name: 'zoom',
+                    type: 'float',
+                    default: .5
+                },
+        ],
+        glsl: `
+                _st *= 10.0;
+                _st = (_st-vec2(5.0))*(abs(sin(time*(speed)))+zoom);
+                _st.x += time*3.0;
+
+                vec2 ipos = floor(_st);  // integer
+                vec2 fpos = fract(_st);  // fraction
+
+                vec2 tile = truchetPattern(fpos, random( ipos ));
+
+                float color = 0.0;
+
+                // Maze
+                if (mode == 0.){
+                    color = smoothstep(tile.x-0.3,tile.x,tile.y)-
+                        smoothstep(tile.x,tile.x+0.3,tile.y);
+                }
+
+                // Circles
+                if(mode == 1.){
+                    color = (step(length(tile),0.6) -
+                        step(length(tile),0.4) ) +
+                        (step(length(tile-vec2(1.)),0.6) -
+                            step(length(tile-vec2(1.)),0.4) );
+                }
+
+                // Truchet (2 triangles)
+                if(mode == 2.){
+                    color = step(tile.x,tile.y);
+                }
+
+                return vec4(vec3(color),1.0);
+                `
+    },
+    {
         name:'outrun',
         type: 'src',
             inputs: [
