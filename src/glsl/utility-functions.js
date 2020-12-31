@@ -126,6 +126,77 @@ module.exports = {
 					}
 					`
     },
+    outRunLine: {
+        type: 'util',
+        glsl: `float outRunLine(float center, float size, float edge, float y) {
+            return max(
+                max(
+                    smoothstep(center - size - edge, center - size, y) *
+                    smoothstep(center + size + edge, center + size, y),
+                    smoothstep(center + size + edge - 1.0, center + size - 1.0, y)
+                ),
+                smoothstep(center - size + 1.0 - edge, center - size + 1.0, y)
+            );
+        }`
+    },
+    bottomGrid: {
+        type: 'util',
+        glsl: `
+                vec3 bottomGrid(vec2 st, in vec3 col, in float maxlines, in float inactive) {
+                    st = vec2(1.0) - st;
+                    vec2 lines = vec2(10.0, 20.0);
+                    float activeVLines = 20.0 - inactive;
+                    float maxVlines = 10.0 + maxlines;
+                    vec2 shift = vec2(mix(lines.x, maxVlines, st.y), lines.y);
+                    vec2 suv = vec2((st.x * shift.x) - (shift.x * 0.5), st.y * shift.y);
+                    vec2 fuv = fract(suv);
+                    vec2 iuv = floor(suv);
+
+                    col *= step(activeVLines, suv.y);
+
+                    // glow lines
+                    vec3 glowCol = vec3(0.3, 1.0, 0.3);
+                    float _time = 1.0 - fract(time* 0.6);
+
+                    float gvLine = outRunLine(0.0, 0.04, 0.08, fuv.x);
+                    float ghLine = max(
+                        outRunLine(_time, 0.12, 0.24, fuv.y),
+                        outRunLine(0.0, 0.12, 0.12, fuv.y) * step(activeVLines - 0.16, suv.y)
+                    );
+
+                    col = mix(col, glowCol, max(ghLine, gvLine) * step(suv.y, activeVLines + .16) * 0.3);
+
+                    // lines
+                    vec3 lineCol = vec3(1.0, 1.0, 1.0);
+
+                    float vLine = outRunLine(0.0, 0.0025, 0.03, fuv.x);
+                    float hLine = max(
+                        outRunLine(_time, 0.015, 0.06, fuv.y),
+                        outRunLine(0.0, 0.03, 0.03, fuv.y) * step(activeVLines - 0.04, suv.y)
+                    );
+
+                    col = mix(col, lineCol, max(hLine, vLine) * step(suv.y, activeVLines + .04));
+                    return col;
+                }
+                `
+    },
+    checker: {
+        type: 'util',
+            glsl: `
+                float checker(vec2 coord) {
+                    coord = mod(floor(coord), 2.0);
+                    return mod(coord.x + coord.y, 2.0);
+                }
+                `
+    },
+    circle: {
+        type: 'util',
+        glsl: ` float circle(in vec2 _st, in float _radius){
+            vec2 dist = _st-vec2(0.5);
+            return 1.-smoothstep(_radius-(_radius*0.01), _radius+(_radius*0.01), dot(dist,dist)*4.0);
+}
+`
+    },
   _hsvToRgb: {
     type: 'util',
     glsl: `vec3 _hsvToRgb(vec3 c){

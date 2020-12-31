@@ -1079,6 +1079,53 @@ module.exports = [
 						color = vec3(pct);
             return vec4(color, 1.0);`
         },
+    {
+        name:'sun',
+        type: 'src',
+        inputs: [
+            {
+                name: 'speed',
+                type: 'float',
+                default: 0.1
+            },
+            {
+                name: 'size',
+                type: 'float',
+                default: 0.5
+            }
+        ],
+        glsl: `
+                        vec2 _uv = vec2(uv.x, 1. - uv.y );
+                        vec3 color = vec3(1.0);
+                        float _sun = smoothstep(mod(_uv.y * (10. + speed) + time, 1.), -.2 + 0.332 * _uv.y * 3.204, time);
+                        color.r *= _sun;
+                        color.g *= _sun * (0.6 + _uv.y - clamp(fract(time), 0.6, 0.7));
+                        color.b = 0.;
+                        return vec4(color * circle(_st, size), 1.);
+                `
+
+    },
+    {
+        name:'outrun',
+        type: 'src',
+            inputs: [
+                {
+                    name: 'speed',
+                    type: 'float',
+                    default: 0.0
+                },
+                {
+                    name: 'active',
+                    type: 'float',
+                    default: 0.0
+                }
+            ],
+            glsl: `
+                    vec3 cc = vec3(0.0);
+                    vec3 color = bottomGrid(_st, cc, speed, active);
+                    return vec4(color, 1.0);
+                `
+    },
 {
   name: 'prev',
   type: 'src',
