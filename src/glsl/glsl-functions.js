@@ -1161,6 +1161,21 @@ module.exports = [
                 `
     },
     {
+        name:'circles',
+        type: 'src',
+        inputs: [
+            {
+                name: 'speed',
+                type: 'float',
+                default: 1.0
+            }
+        ],
+        glsl: `// vec2 p = -1.0 + 2.0 *_st;
+            // p.x *= resolution.x/resolution.y;
+            vec3 circ = vec3(sin(length(_st-0.5)*10.0-time*speed));
+            return vec4(circ,1.);`
+    },
+    {
         name:'outrun',
         type: 'src',
             inputs: [
