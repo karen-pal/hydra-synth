@@ -1,3 +1,20 @@
+# How to actually make it work:
+
+```
+npm install budo
+npm install
+npm run dev
+```
+
+
+> What you see in the screen is the result of the very busy file
+```
+dev/index.js
+
+```
+
+
+
 ### Hydra-Synth
 
 Video synth engine for [hydra](https://github.com/ojack/hydra).
@@ -5,19 +22,6 @@ Video synth engine for [hydra](https://github.com/ojack/hydra).
 Currently experimental / in-progress.
 
 This is the main logic of hydra packaged as a javascript module, intended for use within javascript projects. If you are looking to get started with hydra quickly, visit the [web editor](https://hydra.ojack.xyz) or the [main repo](https://github.com/ojack/hydra). To use hydra within atom, follow the instructions at https://github.com/ojack/hydra-examples.
-
-### To install:
-
-
-```
-npm install hydra-synth
-```
-
-### To develop:
-```
-npm run example
-```
-Sets up an example using hydra-synth that is automatically updated when source files are updated. It is possible to write test code by editing /example/index.js or by writing hydra code into the developer console.
 
 #### To use:
 ```
