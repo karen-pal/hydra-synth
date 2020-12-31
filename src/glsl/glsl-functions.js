@@ -1176,6 +1176,48 @@ module.exports = [
             return vec4(circ,1.);`
     },
     {
+        name:'elec',
+        type: 'src',
+        inputs: [
+            {
+                name: 'lx',
+                type: 'float',
+                default: 0.15
+            },
+            {
+                name: 'ly',
+                type: 'float',
+                default: 0.1
+            },
+            {
+                name: 'lz',
+                type: 'float',
+                default: 0.02
+            }
+        ],
+        glsl: `
+            vec2 uv = (-1.0 + 2.0 *_st);
+            uv.x *= resolution.x/resolution.y;
+
+            float m = 0.;
+            for(int i=0;i<3;i++){
+                float f = floor(time*20.) + float(i)*.5;
+                float b =
+                    elecsimplex_noise(vec3(f, uv.y*1., 1.))*lx +
+                    elecsimplex_noise(vec3(f, uv.y*5., 5.))*ly +
+                    elecsimplex_noise(vec3(f, uv.y*15., 10.))*lz;
+
+                float l = .000025+(uv.y+.5)*.00001;
+                m += .0005/smoothstep(0., l*25e3, abs(b-uv.x));
+            }
+
+            m = min(m, 10.);
+
+            vec3 col = vec3(1.) * m;
+            return vec4(col,1.0);
+        `
+    },
+    {
         name:'outrun',
         type: 'src',
             inputs: [
