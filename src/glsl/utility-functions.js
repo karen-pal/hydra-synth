@@ -100,6 +100,32 @@ module.exports = {
             return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
         }`
   },
+    random_f: {
+        type: 'util',
+        glsl: `
+            float random_f(in float x) {
+                return fract(sin(x)*43758.5453);
+        }`
+    },
+    random_i: {
+        type: 'util',
+        glsl: `
+            float random_i (in vec2 _st) {
+                return fract(sin(dot(_st.xy, vec2(12.9898,78.233)))* 43758.5453123 + abs(time * .125));
+        }`
+    },
+    randChar: {
+        type: 'util',
+        glsl: ` float randomChar(in vec2 outer, in vec2 inner){
+						float grid = 5.;
+						vec2 margin = vec2(.2,.05);
+						vec2 borders = step(margin,inner)*step(margin,1.-inner);
+						vec2 ipos = floor(inner*grid);
+						vec2 fpos = fract(inner*grid);
+						return step(.5,random_i(outer*64.+ipos))*borders.x*borders.y*step(0.01,fpos.x)*step(0.01,fpos.y);
+					}
+					`
+    },
   _hsvToRgb: {
     type: 'util',
     glsl: `vec3 _hsvToRgb(vec3 c){

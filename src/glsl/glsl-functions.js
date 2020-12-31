@@ -1032,6 +1032,53 @@ module.exports = [
             return vec4(x,x,x,1.);
         `
     },
+    {
+        name:'silexars',
+        type: 'src',
+        inputs: [
+            {
+                name: 'speed',
+                type: 'float',
+                default: 0.0
+            }
+        ],
+        glsl: `
+            vec3 c;
+            float l,z=time;
+            for(int i=0;i<3;i++) {
+                vec2 uv,p=_st;
+                uv=p;
+                p-=.5;
+                z+=.07;
+                l=length(p);
+                uv+=p/l*(sin(z)+1.)*abs(sin(l*9.-z*2.));
+                c[i]=.01/length(abs(mod(uv,1.)-.5));
+            }
+            return vec4(c/l,time);
+        `
+    },
+    {
+        name:'matrix',
+        type: 'src',
+        inputs: [
+            {
+                name: 'rows',
+                type: 'float',
+                default: 24.0
+            }
+        ],
+        glsl: `
+						vec3 color = vec3(.0);
+						vec2 ipos = floor(_st*rows);
+						vec2 fpos = fract(_st*rows);
+                        float the_random = random_f(ipos.x + 1.);
+						ipos += vec2(0.,floor(-time*20.*the_random));
+						float pct = 2.;
+						pct *= randomChar(ipos,fpos);
+						pct *= random_i(ipos);
+						color = vec3(pct);
+            return vec4(color, 1.0);`
+        },
 {
   name: 'prev',
   type: 'src',
