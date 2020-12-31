@@ -998,6 +998,41 @@ module.exports = [
    return vec4(c, _c0.a);`
 },
 {
+    name:'colorgrid',
+    type: 'src',
+    inputs: [
+        {
+            name: 'speed',
+            type: 'float',
+            default: 0.0
+        }
+    ],
+    glsl: `vec2 st = _st * 2. - 1.;
+        float id = 0.5 + 0.5*cos(time + sin(dot(floor(_st*speed+0.5),vec2(113.1,17.81)))*43758.545);
+        vec3  co = 0.5 + 0.5*cos(time + 3.5*id + vec3(0.0,1.57,3.14) );
+        vec2  pa = smoothstep( 0.0, 0.2, id*(0.5 + 0.5*cos(6.2831*st*speed)) );
+        return vec4( co*pa.x*pa.y, 1.0 );
+    `
+},
+    {
+        name:'smoke',
+        type: 'src',
+        inputs: [
+            {
+                name: 'zoom',
+                type: 'float',
+                default: 1.0
+            }
+        ],
+        glsl: `
+            vec2 p = -1.0+2.0*_st;
+            highp int z = int(zoom);
+            float w = sin(time+6.5*sqrt(dot(p,p))*cos(p.x));
+            float x = cos(atan(p.y,p.x)*float(z) + 1.8*w);
+            return vec4(x,x,x,1.);
+        `
+    },
+{
   name: 'prev',
   type: 'src',
   inputs: [
